@@ -66,7 +66,7 @@ jobs:
         echo "Found TTFLoaderMono.dll at: $DLL_MONO"
         cp "$DLL_MONO" artifacts/
         
-        # 移除 README 和 LICENSE 复制步骤
+        cp LICENSE README.md artifacts/
 
     - name: Verify DLLs are not reference assemblies
       # 兜底校验：引用程序集（ref/）没有 IL 代码，误打包会导致 BepInEx 加载失败
@@ -133,7 +133,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v')
       with:
         # 将 artifacts 目录下的所有 DLL 文件作为附件上传到 Release
-        files: artifacts/*.dll
+        files: artifacts/*
         name: TTFLoader ${{ steps.gen_version.outputs.version }}
         body: |
           ## TTFLoader ${{ steps.gen_version.outputs.version }}

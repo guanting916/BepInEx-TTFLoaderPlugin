@@ -1,96 +1,73 @@
-# TTF Font Loader Plugin
+# BepInEx TTF Font Loader — 1.2.1
 
-此 BepInEx 插件可让 Unity IL2CPP/Mono 游戏直接加载并使用 TTF 字体文件，以实现游戏内字体的替换显示。
+本專案 Fork 自 [you9you/BepInEx-TTFLoaderPlugin](https://github.com/you9you/BepInEx-TTFLoaderPlugin)。保留原作者的 MIT 授權與 Git 歷史，本 Fork 加入字型替換改善。
 
+## 本 Fork 的改動
 
-## 功能特性
+- 由設定檔指定字型檔名，不再任意選擇第一個 TTF。
+- 直接替換啟用中的 TMP 與 Unity UI 文字元件所用字型。
+- 同步更新 TMP 共用材質，避免繼續使用原字形圖。
+- 建立 2048×2048 動態 TMP 字形圖，啟用多張字形圖。
+- 預設每兩秒處理後來開啟的文字元件。
+- 初始化或套用發生錯誤時，停止後續處理並記錄原因。
+- 不執行固定文字的啟動字形測試。
 
-- 直接加载位于游戏根目录下的 `.ttf` 字体文件
-- 自动将找到的第一个 TTF 字体设为 TMP 默认字体
-- 支持 TextMesh Pro 字体资源创建
-- 兼容系统字体兜底机制（如 Arial、微软雅黑等）
-- 解决`XUnity.AutoTranslator 5.4.5`中`OverrideFontTextMeshPro`与`FallbackFontTextMeshPro`失效问题
+本插件不翻譯文字、不修改圖片，也不修改 XUnity/Sakura 翻譯流程。
 
-## 确认你的目标游戏使用的是`Mono`还是`IL2CPP`： 
+## 安裝與設定
 
-你可以通过检查游戏目录中的 `GameAssembly.dll` 来判断： 
-- 如果存在`GameAssembly.dll` → IL2CPP
-- 如果存在`Managed`文件夹和`.dll` 文件 → Mono
+關閉遊戲，將對應 DLL 放入 `BepInEx/plugins`。保留原插件 GUID `com.github.you9you.ttfloader`，不要同時載入原版與本版。
 
-## 安装方法
+| 版本 | DLL | 環境 |
+|---|---|---|
+| Mono | `TTFLoaderMono.dll` | BepInEx 5 |
+| IL2CPP | `TTFLoaderIL2CPP.dll` | BepInEx 6、Il2CppInterop 1.5.3 |
 
-1. 根据游戏类型选择对应版本`IL2CPP`或`Mono`。
-2. 将编译好的 `TTFLoader-<IL2CPP/Mono>.dll` 放入游戏目录下的 `BepInEx/plugins/` 文件夹中。
-3. 将你的 `.ttf` 字体文件放置于游戏根目录下（与游戏主程序同级目录）。
+字型檔由使用者自行提供。設定檔為 `BepInEx/config/com.github.you9you.ttfloader.cfg`，範例如下：
 
-## 使用方式
-
-插件会在启动时自动扫描游戏根目录中的所有 `.ttf` 文件，并尝试将第一个有效的字体设置为 TMP 的默认字体。
-
-例如：
-```
-游戏目录/
-├── Game.exe
-├── BepInEx/
-│   └── plugins/
-│       └── TTFLoader-<IL2CPP/Mono>.dll
-├── NotoSansSC-Regular.ttf   ← 插件会加载这个字体
-├── arialuni.TTF
-└── other_font.ttf
+```ini
+[General]
+Enabled = true
+FontFile = LXGW.ttf
+ScanIntervalSeconds = 2
 ```
 
-## 支持的字体格式
+`FontFile` 為相對遊戲根目錄的路徑，請改為實際字型檔名。首次預設值：Mono 是 `微軟正黑體.ttf`，IL2CPP 是 `LXGW.ttf`；既有設定不會被覆蓋。更改字型後重新啟動遊戲。
 
-- `.ttf` （小写）
-- `.TTF` （大写）
+## 建置
 
-## 日志输出
+### 已驗證的 Windows 建置方式
 
-插件通过 BepInEx 的日志系统记录加载过程，可在以下路径查看日志：
+`build.ps1` 使用目標環境現有的依賴，不下載或散布遊戲組件。
 
-```
-BepInEx/LogOutput.log
-```
-
-示例日志：
-```
-[Info   : TTF Font Loader] Plugin TTF Font Loader is loaded!
-[Info   : TTF Font Loader] Successfully set default TMP font to: NotoSansSC-Regular
+```powershell
+./build.ps1 -Target Mono -GameRoot 'D:\YourGame'
+./build.ps1 -Target IL2CPP -GameRoot 'D:\YourGame' -CompilerPath 'C:\BuildTools\Roslyn\csc.exe'
 ```
 
-## 兼容性
+Mono 預設使用 Windows .NET Framework C# 編譯器。有多個 `*_Data/Managed` 時，以 `-ManagedDirectory` 指定。
 
-- Unity 2021.x
-- Unity 2023.x
-- BepInEx 6.x (IL2CPP)
-- BepInEx 5.x (Mono)
-- TextMesh Pro (TMP)
+IL2CPP 需要 Roslyn `csc.exe`、BepInEx 6、目標遊戲產生的 `BepInEx/interop`，以及 .NET 6 runtime DLL。預設 runtime 位於 `GameRoot/dotnet`，可用 `-RuntimeDirectory` 指定其他路徑。
 
-> ⚠️ 因`XUnity.AutoTranslator (Mono)`尚不支持`BepInEx 6.x (Mono)`，因此暂未适配。
+輸出位於 `bin/Mono` 或 `bin/IL2CPP`。
 
-## API 接口（供其他插件调用）
+### SDK 專案
 
-如果你是开发者，并希望手动加载字体，可以使用如下公共方法：
+保留上游 solution，版本更新為 1.2.1。使用 .NET SDK 時，可用 `-p:UnityReferenceDirectory=...` 指定 Unity/TMP 組件目錄。Mono 與 IL2CPP 必須各自使用正確類型的組件，請分開建置。
 
-### 加载 Unity Font
+上游隨附 `libs` 保持原樣，並非目標遊戲的完整依賴。新增的 UI/UIModule/TextCore 引用需要依環境補齊。
 
-```csharp
-Font font = TTFLoaderPlugin.Instance.LoadTTF("NotoSansSC-Regular");
-```
+上游 GitHub Actions 尚未用本 Fork 所需依賴完成驗證。本次驗證使用 `build.ps1`，未發布 Release 或 tag。
 
-### 加载 TMP_FontAsset
+## 相容性與驗證
 
-```csharp
-TMP_FontAsset tmpFont = TTFLoaderPlugin.Instance.LoadTMPTTF("NotoSansSC-Regular");
-```
+- 兩版均使用目前 Unity 6 相關組件編譯，不保證所有 Unity/TMP 版本相容。
+- IL2CPP 應使用目標遊戲產生的 interop；尚未完成遊戲內驗證。
+- 換字型及材質可能改變字寬、描邊、陰影與排版。
+- 本 Fork 未保留上游 README 所述 `Instance.LoadTTF/LoadTMPTTF` 公開 API；依賴這些 API 的外掛需另行處理。
 
-> ⚠️ 注意：这些方法需要确保字体文件存在于游戏根目录中。
+## 來源與授權
 
-## 注意事项
+原作者：游游（you9you）。上游：[BepInEx-TTFLoaderPlugin](https://github.com/you9you/BepInEx-TTFLoaderPlugin)。
 
-- 若未找到任何 `.ttf` 文件，插件将不会更改默认字体。
-- 插件不会覆盖已有的 TMP 设置，除非成功加载了新的默认字体。
-- IL2CPP版本会直接设置为 TextMesh Pro 的默认字体。
-- Mono版本在 TMP 失效时，会使用`UI.Text`加载字体。
-- 插件目前仅支持设置全局默认字体，不支持针对特定 UI 组件的字体替换。
-- 仅在`2023.2.20f1 BepInEx6.0.0-be.738 IL2CPP` `2021.3.15f1 BepInEx5.4.23.4 Mono`中测试，其他版本请自行测试。
+程式碼沿用 [MIT License](LICENSE)。字型、Unity、BepInEx 等依賴適用各自授權。

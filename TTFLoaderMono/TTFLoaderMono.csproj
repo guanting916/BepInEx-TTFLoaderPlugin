@@ -4,13 +4,14 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>TTFLoaderMono</AssemblyName>
     <Description>BepInEx plugin to load TTF fonts directly</Description>
-    <Version>1.1.4</Version>
+    <Version>1.2.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
       https://api.nuget.org/v3/index.json;
       https://nuget.bepinex.dev/v3/index.json
     </RestoreAdditionalProjectSources>
+    <UnityReferenceDirectory Condition="'$(UnityReferenceDirectory)' == ''">libs</UnityReferenceDirectory>
     <RootNamespace>TTFLoaderMono</RootNamespace>
     <!-- 显式禁止生成 ref/ 引用程序集，避免 CI 误打包 ref dll -->
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
@@ -28,28 +29,28 @@
   <ItemGroup>
     <!-- if v5 -->
     <Reference Include="UnityEngine">
-      <HintPath>libs\UnityEngine.dll</HintPath>
+      <HintPath>$(UnityReferenceDirectory)\UnityEngine.dll</HintPath>
     </Reference>
 
 
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>libs\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(UnityReferenceDirectory)\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextCoreFontEngineModule">
-      <HintPath>libs\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
+      <HintPath>$(UnityReferenceDirectory)\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>libs\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>$(UnityReferenceDirectory)\UnityEngine.TextRenderingModule.dll</HintPath>
 
-      <!-- FIX: 类型“Font”同时存在于“UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null”和“UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null”中 -->
-      <Aliases>textrender</Aliases>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(UnityReferenceDirectory)\UnityEngine.UIModule.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>libs\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>$(UnityReferenceDirectory)\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>libs\UnityEngine.UI.dll</HintPath>
+      <HintPath>$(UnityReferenceDirectory)\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
 
