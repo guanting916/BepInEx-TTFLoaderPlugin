@@ -1,5 +1,7 @@
 # BepInEx TTF Font Loader — 1.2.1
 
+本專案透過 **GPT6.1 SOL** 協助建置與編譯。
+
 本專案 Fork 自 [you9you/BepInEx-TTFLoaderPlugin](https://github.com/you9you/BepInEx-TTFLoaderPlugin)。保留原作者的 MIT 授權與 Git 歷史，本 Fork 加入字型替換改善。
 
 ## 本 Fork 的改動
@@ -57,7 +59,7 @@ IL2CPP 需要 Roslyn `csc.exe`、BepInEx 6、目標遊戲產生的 `BepInEx/inte
 
 上游隨附 `libs` 保持原樣，並非目標遊戲的完整依賴。新增的 UI/UIModule/TextCore 引用需要依環境補齊。
 
-上游 GitHub Actions 尚未用本 Fork 所需依賴完成驗證。本次驗證使用 `build.ps1`，未發布 Release 或 tag。
+上游 GitHub Actions 尚未用本 Fork 所需依賴完成驗證。已使用 `build.ps1` 建置並發布 [v1.2.1 Pre-release](https://github.com/guanting916/BepInEx-TTFLoaderPlugin/releases/tag/v1.2.1)，附件不包含字型檔。
 
 ## 相容性與驗證
 
