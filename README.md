@@ -1,75 +1,97 @@
-# BepInEx TTF Font Loader — 1.2.1
+# BepInEx TTF Font Loader
 
-本專案透過 **GPT6.1 SOL** 協助建置與編譯。
+替 Unity 遊戲的文字元件指定 TTF 字型。這是字型替換插件，不是翻譯器；它不會把日文翻成中文，也不處理圖片中的文字。
 
-本專案 Fork 自 [you9you/BepInEx-TTFLoaderPlugin](https://github.com/you9you/BepInEx-TTFLoaderPlugin)。保留原作者的 MIT 授權與 Git 歷史，本 Fork 加入字型替換改善。
+本專案透過 **GPT6.1 SOL** 協助建置與編譯。Fork 自 [you9you/BepInEx-TTFLoaderPlugin](https://github.com/you9you/BepInEx-TTFLoaderPlugin)，保留原作者授權與上游歷史。
 
-## 本 Fork 的改動
+## 1. 安裝前先準備
 
-- 由設定檔指定字型檔名，不再任意選擇第一個 TTF。
-- 直接替換啟用中的 TMP 與 Unity UI 文字元件所用字型。
-- 同步更新 TMP 共用材質，避免繼續使用原字形圖。
-- 建立 2048×2048 動態 TMP 字形圖，啟用多張字形圖。
-- 預設每兩秒處理後來開啟的文字元件。
-- 初始化或套用發生錯誤時，停止後續處理並記錄原因。
-- 不執行固定文字的啟動字形測試。
+- Windows Unity 遊戲，以及適用該遊戲的 BepInEx 環境。
+- 一個你自行準備、含所需中文字形的 `.ttf` 字型檔。**本專案及 Release 不附字型。**
+- 確認遊戲使用 Mono 或 IL2CPP，下載對應 DLL。
 
-本插件不翻譯文字、不修改圖片，也不修改 XUnity/Sakura 翻譯流程。
+若還沒安裝 BepInEx，先依其[官方安裝說明](https://docs.bepinex.dev/)完成安裝並啟動遊戲一次。能產生 `BepInEx/LogOutput.log` 後，再安裝本插件；遊戲本身不會自動具備 BepInEx。
 
-## 安裝與設定
+| 遊戲環境 | 使用的檔案 |
+|---|---|
+| BepInEx 5 Mono | `TTFLoaderMono.dll` |
+| BepInEx 6 IL2CPP / Il2CppInterop 1.5.3 | `TTFLoaderIL2CPP.dll` |
 
-關閉遊戲，將對應 DLL 放入 `BepInEx/plugins`。保留原插件 GUID `com.github.you9you.ttfloader`，不要同時載入原版與本版。
+遊戲根目錄有 `GameAssembly.dll` 通常是 IL2CPP；有 `遊戲名_Data/Managed/Assembly-CSharp.dll` 通常是 Mono。不確定時，先確認該遊戲適用的 BepInEx 類型，不要把兩份 DLL 都放進去。
 
-| 版本 | DLL | 環境 |
-|---|---|---|
-| Mono | `TTFLoaderMono.dll` | BepInEx 5 |
-| IL2CPP | `TTFLoaderIL2CPP.dll` | BepInEx 6、Il2CppInterop 1.5.3 |
+## 2. 下載及放置 DLL
 
-字型檔由使用者自行提供。設定檔為 `BepInEx/config/com.github.you9you.ttfloader.cfg`，範例如下：
+到 [Release 下載頁](https://github.com/guanting916/BepInEx-TTFLoaderPlugin/releases/tag/v1.2.1)，從 **Assets** 下載對應 DLL。一般安裝不需要下載 GitHub 自動附上的 `Source code`，也不需要自行編譯。
+
+關閉遊戲，將 DLL 放入該遊戲的 `BepInEx/plugins`。資料夾不存在時可自行建立。若已有舊版字型插件，先移到遊戲目錄外備份，避免同時載入相同插件。
+
+## 3. 放置字型檔
+
+這份說明的「遊戲根目錄」是**遊戲 `.exe` 所在的資料夾**，不是存檔位置，也不是 `BepInEx/plugins`。
+
+例如你準備的字型檔叫 `MyFont.ttf`，請這樣放：
+
+```text
+遊戲資料夾/
+├── Game.exe
+├── MyFont.ttf                ← 自行準備的字型
+└── BepInEx/
+    ├── plugins/
+    │   └── 對應的字型插件.dll
+    └── config/
+        └── com.github.you9you.ttfloader.cfg
+```
+
+上圖的 `Game.exe`、`MyFont.ttf` 和「對應的字型插件.dll」是示意名稱，請使用實際遊戲、字型及 DLL 檔名。字型不必改名成某個指定名稱。
+
+## 4. 產生及修改設定
+
+1. 放好 DLL 後，啟動遊戲一次，再正常關閉。
+2. 插件會自動建立 `BepInEx/config/com.github.you9you.ttfloader.cfg`，**通常不需要手動建立設定檔**。
+3. 用記事本開啟該檔案，找到 `[General]`，將 `FontFile` 改成實際字型檔名。
+4. 儲存後重新啟動遊戲。
+
+若字型檔為上面的 `MyFont.ttf`，設定應為：
 
 ```ini
 [General]
 Enabled = true
-FontFile = LXGW.ttf
+FontFile = MyFont.ttf
 ScanIntervalSeconds = 2
 ```
 
-`FontFile` 為相對遊戲根目錄的路徑，請改為實際字型檔名。首次預設值：Mono 是 `微軟正黑體.ttf`，IL2CPP 是 `LXGW.ttf`；既有設定不會被覆蓋。更改字型後重新啟動遊戲。
+- `Enabled`：`true` 啟用，`false` 停用。
+- `FontFile`：相對遊戲根目錄的字型路徑。請填寫實際檔名，**不要留空**。
+- `ScanIntervalSeconds`：檢查新文字元件的間隔秒數，通常維持 `2` 即可。
 
-## 建置
+**上面是填寫範例，不代表附件包含 `MyFont.ttf`。**設定檔自動產生的字型名稱只是初始值，請確認並改成自己實際準備的檔案。已存在的設定會沿用，不會因更新 DLL 自動換成新值。
 
-### 已驗證的 Windows 建置方式
+字型若放在 `遊戲資料夾/Fonts/MyFont.ttf`，則填 `FontFile = Fonts/MyFont.ttf`。修改後都需要重開遊戲。
 
-`build.ps1` 使用目標環境現有的依賴，不下載或散布遊戲組件。
+## 5. 確認是否生效
 
-```powershell
-./build.ps1 -Target Mono -GameRoot 'D:\YourGame'
-./build.ps1 -Target IL2CPP -GameRoot 'D:\YourGame' -CompilerPath 'C:\BuildTools\Roslyn\csc.exe'
-```
+進入有文字的畫面後稍候數秒，插件會替換目前啟用的 TMP／Unity UI 文字元件字型。字型替換在執行時進行，不會修改遊戲原始資源檔。
 
-Mono 預設使用 Windows .NET Framework C# 編譯器。有多個 `*_Data/Managed` 時，以 `-ManagedDirectory` 指定。
+可用記事本開啟 `BepInEx/LogOutput.log`，搜尋 `TTF Font Loader`、`Font loader`、`Font applied` 或 `Font initialization failed`，確認載入與錯誤原因。
 
-IL2CPP 需要 Roslyn `csc.exe`、BepInEx 6、目標遊戲產生的 `BepInEx/interop`，以及 .NET 6 runtime DLL。預設 runtime 位於 `GameRoot/dotnet`，可用 `-RuntimeDirectory` 指定其他路徑。
+## 常見問題
 
-輸出位於 `bin/Mono` 或 `bin/IL2CPP`。
+| 狀況 | 檢查方式 |
+|---|---|
+| 沒有產生設定檔 | 先確認 BepInEx 正常載入，DLL 放對位置且類型正確，再查看 `LogOutput.log`。 |
+| 出現找不到字型 | 核對 `FontFile`、副檔名與實際位置；注意不要變成 `MyFont.ttf.ttf`。修正後重開遊戲。 |
+| 設定後沒變 | 確認已重開遊戲且 `Enabled = true`；查看 LOG。圖片字或不支援的文字框架不會因此更換字型。 |
+| 還是有缺字 | 字型本身需包含該字形；並非每種裁切、逐字顯示問題都能靠換字型解決。 |
+| 字寬、描邊或排版改變 | 換字型及材質可能影響呈現，請自行確認效果。 |
 
-### SDK 專案
+## 更新、停用與還原
 
-保留上游 solution，版本更新為 1.2.1。使用 .NET SDK 時，可用 `-p:UnityReferenceDirectory=...` 指定 Unity/TMP 組件目錄。Mono 與 IL2CPP 必須各自使用正確類型的組件，請分開建置。
+- 更新：先關閉遊戲，替換原 DLL；保留既有 `.cfg`，並確認 `FontFile` 仍正確。
+- 停用：設定 `Enabled = false`，再重開遊戲。
+- 還原：關閉遊戲，移除本插件或換回先前備份的版本；不需要刪除整個 BepInEx。
 
-上游隨附 `libs` 保持原樣，並非目標遊戲的完整依賴。新增的 UI/UIModule/TextCore 引用需要依環境補齊。
+## 開發與授權
 
-上游 GitHub Actions 尚未用本 Fork 所需依賴完成驗證。已使用 `build.ps1` 建置並發布 [v1.2.1 Pre-release](https://github.com/guanting916/BepInEx-TTFLoaderPlugin/releases/tag/v1.2.1)，附件不包含字型檔。
+需要修改或自行編譯時，請參閱 [BUILDING.md](BUILDING.md)。本 Fork 使用動態字形圖、多張字形圖與定期掃描，保留原插件 GUID `com.github.you9you.ttfloader`。
 
-## 相容性與驗證
-
-- 兩版均使用目前 Unity 6 相關組件編譯，不保證所有 Unity/TMP 版本相容。
-- IL2CPP 應使用目標遊戲產生的 interop；尚未完成遊戲內驗證。
-- 換字型及材質可能改變字寬、描邊、陰影與排版。
-- 本 Fork 未保留上游 README 所述 `Instance.LoadTTF/LoadTMPTTF` 公開 API；依賴這些 API 的外掛需另行處理。
-
-## 來源與授權
-
-原作者：游游（you9you）。上游：[BepInEx-TTFLoaderPlugin](https://github.com/you9you/BepInEx-TTFLoaderPlugin)。
-
-程式碼沿用 [MIT License](LICENSE)。字型、Unity、BepInEx 等依賴適用各自授權。
+原作者：游游（you9you）。程式碼沿用原作者 [MIT License](LICENSE)。字型、Unity、BepInEx 等依賴適用各自授權；本插件不授予其再散布權。
