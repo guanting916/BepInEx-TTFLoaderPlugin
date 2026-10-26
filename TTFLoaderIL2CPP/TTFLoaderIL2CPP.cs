@@ -9,11 +9,11 @@ using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
 using UnityEngine.UI;
 
-[assembly: System.Reflection.AssemblyVersion("1.2.1.0")]
+[assembly: System.Reflection.AssemblyVersion("1.2.2.0")]
 
 namespace TTFLoaderIL2CPP
 {
-    [BepInPlugin("com.github.you9you.ttfloader", "TTF Font Loader (IL2CPP)", "1.2.1")]
+    [BepInPlugin("com.github.you9you.ttfloader", "TTF Font Loader (IL2CPP)", "1.2.2")]
     public sealed class TTFLoaderPlugin : BasePlugin
     {
         internal static FontRuntime Runtime;
@@ -22,12 +22,17 @@ namespace TTFLoaderIL2CPP
         {
             ConfigEntry<bool> enabled = Config.Bind<bool>("General", "Enabled", true,
                 "Apply the selected font to active TMP and Unity UI labels.");
-            ConfigEntry<string> fontFile = Config.Bind<string>("General", "FontFile", "LXGW.ttf",
-                "Font file relative to the game directory.");
+            ConfigEntry<string> fontFile = Config.Bind<string>("General", "FontFile", "",
+                "Font file relative to the game directory. Leave blank to skip font replacement; set a file name and restart.");
             ConfigEntry<float> interval = Config.Bind<float>("General", "ScanIntervalSeconds", 2f,
                 "Scan for newly opened UI; minimum 1 second.");
             Runtime = new FontRuntime(Log, enabled, fontFile, interval);
             if (!enabled.Value) { Log.LogInfo("Font loader disabled in configuration."); return; }
+            if (string.IsNullOrWhiteSpace(fontFile.Value))
+            {
+                Log.LogInfo("FontFile 尚未設定，已跳過字型替換。請將 TTF 放在遊戲執行檔旁，設定 FontFile 後重新啟動遊戲。");
+                return;
+            }
             try
             {
                 // BepInEx registers this type and attaches it to its persistent manager.
@@ -106,7 +111,7 @@ namespace TTFLoaderIL2CPP
             }
             if (!fallbacks.Contains(tmpFont)) fallbacks.Add(tmpFont);
             initialized = true;
-            log.LogInfo("IL2CPP font loader 1.2.1 ready: replaces actual component fonts; font=" + path);
+            log.LogInfo("IL2CPP font loader 1.2.2 ready: replaces actual component fonts; font=" + path);
             return true;
         }
 

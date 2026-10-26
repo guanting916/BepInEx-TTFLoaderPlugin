@@ -21,7 +21,7 @@
 
 ## 2. 下載及放置 DLL
 
-到 [Release 下載頁](https://github.com/guanting916/BepInEx-TTFLoaderPlugin/releases/tag/v1.2.1)，從 **Assets** 下載對應 DLL。一般安裝不需要下載 GitHub 自動附上的 `Source code`，也不需要自行編譯。
+到 [Release 下載頁](https://github.com/guanting916/BepInEx-TTFLoaderPlugin/releases/tag/v1.2.2)，從 **Assets** 下載對應 DLL。一般安裝不需要下載 GitHub 自動附上的 `Source code`，也不需要自行編譯。
 
 關閉遊戲，將 DLL 放入該遊戲的 `BepInEx/plugins`。資料夾不存在時可自行建立。若已有舊版字型插件，先移到遊戲目錄外備份，避免同時載入相同插件。
 
@@ -61,10 +61,10 @@ ScanIntervalSeconds = 2
 ```
 
 - `Enabled`：`true` 啟用，`false` 停用。
-- `FontFile`：相對遊戲根目錄的字型路徑。請填寫實際檔名，**不要留空**。
+- `FontFile`：相對遊戲根目錄的字型路徑。兩版首次預設均留空；未填或只有空白時，跳過字型替換，並記錄一次設定提示。填寫後重新啟動遊戲。
 - `ScanIntervalSeconds`：檢查新文字元件的間隔秒數，通常維持 `2` 即可。
 
-**上面是填寫範例，不代表附件包含 `MyFont.ttf`。**設定檔自動產生的字型名稱只是初始值，請確認並改成自己實際準備的檔案。已存在的設定會沿用，不會因更新 DLL 自動換成新值。
+**上面是已完成設定的範例，不代表附件包含 `MyFont.ttf`。**v1.2.2 首次產生的設定為 `FontFile =`，不會自行選擇任何字型。若已有舊設定，新版會沿用，不會自動清空或替換使用者的檔名。
 
 字型若放在 `遊戲資料夾/Fonts/MyFont.ttf`，則填 `FontFile = Fonts/MyFont.ttf`。修改後都需要重開遊戲。
 
@@ -80,6 +80,7 @@ ScanIntervalSeconds = 2
 |---|---|
 | 沒有產生設定檔 | 先確認 BepInEx 正常載入，DLL 放對位置且類型正確，再查看 `LogOutput.log`。 |
 | 出現找不到字型 | 核對 `FontFile`、副檔名與實際位置；注意不要變成 `MyFont.ttf.ttf`。修正後重開遊戲。 |
+| 尚未設定字型 | `FontFile` 留空時是正常跳過，不視為字型載入錯誤。填好實際檔名、儲存並重開遊戲。 |
 | 設定後沒變 | 確認已重開遊戲且 `Enabled = true`；查看 LOG。圖片字或不支援的文字框架不會因此更換字型。 |
 | 還是有缺字 | 字型本身需包含該字形；並非每種裁切、逐字顯示問題都能靠換字型解決。 |
 | 字寬、描邊或排版改變 | 換字型及材質可能影響呈現，請自行確認效果。 |

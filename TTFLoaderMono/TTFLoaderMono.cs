@@ -11,7 +11,7 @@ using UnityEngine.UI;
 namespace TTFLoaderMono
 {
     // Replacement for the original plugin. Keep its identity to avoid two loaders.
-    [BepInPlugin("com.github.you9you.ttfloader", "TTF Font Loader (Mono)", "1.2.1")]
+    [BepInPlugin("com.github.you9you.ttfloader", "TTF Font Loader (Mono)", "1.2.2")]
     public sealed class TTFLoaderPlugin : BaseUnityPlugin
     {
         private ConfigEntry<bool> loaderEnabled;
@@ -26,13 +26,19 @@ namespace TTFLoaderMono
         private void Awake()
         {
             loaderEnabled = Config.Bind<bool>("General", "Enabled", true, "Apply the selected font to active TMP and Unity UI labels.");
-            fontFile = Config.Bind<string>("General", "FontFile", "微軟正黑體.ttf", "Font file relative to the game directory.");
+            fontFile = Config.Bind<string>("General", "FontFile", "", "Font file relative to the game directory. Leave blank to skip font replacement; set a file name and restart.");
             scanInterval = Config.Bind<float>("General", "ScanIntervalSeconds", 2f, "Scan for newly opened UI; minimum 1 second.");
         }
 
         private void Start()
         {
-            if (!loaderEnabled.Value) return;
+            if (!loaderEnabled.Value || stopped) return;
+            if (string.IsNullOrWhiteSpace(fontFile.Value))
+            {
+                stopped = true;
+                Logger.LogInfo("FontFile 尚未設定，已跳過字型替換。請將 TTF 放在遊戲執行檔旁，設定 FontFile 後重新啟動遊戲。");
+                return;
+            }
             try
             {
                 string path = Path.GetFullPath(Path.Combine(Paths.GameRootPath, fontFile.Value));
@@ -57,7 +63,7 @@ namespace TTFLoaderMono
                 if (!fallbacks.Contains(tmpFont)) fallbacks.Add(tmpFont);
                 ready = true;
                 nextScan = Time.realtimeSinceStartup + 1f;
-                Logger.LogInfo("Font loader 1.2.1 ready: replaces actual component fonts; font=" + path);
+                Logger.LogInfo("Font loader 1.2.2 ready: replaces actual component fonts; font=" + path);
             }
             catch (Exception ex)
             {
